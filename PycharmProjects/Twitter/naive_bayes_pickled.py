@@ -42,7 +42,7 @@ classifier = pickle.load(saved_classifier)
 saved_word_features.close()
 
 print "Naive Bayes Algorithm accuracy percent:", nltk.classify.accuracy(classifier, testing_set)*100
-classifier.show_most_informative_features(15)
+print classifier.show_most_informative_features(15)
 
 
 def sentiment(text):
