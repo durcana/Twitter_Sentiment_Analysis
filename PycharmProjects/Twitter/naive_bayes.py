@@ -53,18 +53,3 @@ def sentiment(text):
     feats = find_features(text)
 
     return classifier.classify(feats)
-
-
-print sentiment("birth")
-print sentiment("conviction")
-
-
-# When testing the streamed data, I figured I'd want the same data that classifier.show_most_informative_features gives.
-# It shows in format:         sad = True    neg : pos = 12.6 : 1.0
-# Then use the neg:pos ratio to calculate the average sentiment.
-
-# What I'm trying to now figure out is out to incorporate the streamed data from the txt file into this algorithm.
-
-# Also, SentimentAnalyzer has modules which can be seen at:
-# http://www.nltk.org/_modules/nltk/sentiment/sentiment_analyzer.html#SentimentAnalyzer
-# Should I use SentimentAnalyzer to make any of this simpler?
