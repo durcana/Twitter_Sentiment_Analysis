@@ -1,7 +1,6 @@
 from json import loads
 from tweepy import OAuthHandler
 import os
-import stopit
 from tweepy import Stream
 from tweepy.streaming import StreamListener
 import naive_bayes_pickled
@@ -11,10 +10,6 @@ ckey = os.environ.get('CKEY')
 csecret = os.environ.get('CSECRET')
 atoken = os.environ.get('ATOKEN')
 asecret = os.environ.get('ASECRET')
-
-feed = open('twitter_feed.txt', 'a')
-feed.write('[')
-feed.close()
 
 
 class Listener(StreamListener):
@@ -40,9 +35,3 @@ auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 twitterStream = Stream(auth, Listener())
 twitterStream.filter(track=['conviction', 'birth'], languages=['en'])
-
-stopit.ThreadingTimeout(5)
-
-feed = open('twitter_feed.txt', 'a')
-feed.write(']')
-feed.close()
