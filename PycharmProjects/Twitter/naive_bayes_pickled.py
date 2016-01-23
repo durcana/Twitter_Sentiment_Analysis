@@ -57,10 +57,19 @@ def bayes(testing_set):
     return classifier
 
 # I don't know how to make this work anymore by only having text as the parameter, which is necessary for feed.py
-# def sentiment(text):
-    # feats = find_features(text)
+def sentiment(text, tweets, word_features):
 
-    # return classifier.classify(feats)
+    def find_features():
+        words = set(tweets)
+        features = {}
+        for w in word_features:
+            features[w] = (w in words)
+
+        return features
+
+    feats = find_features(text)
+
+    return classifier.classify(feats)
 
 # Do I need this every time?
 if __name__ == '__main__':
