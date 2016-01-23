@@ -12,6 +12,10 @@ atoken = os.environ.get('ATOKEN')
 asecret = os.environ.get('ASECRET')
 
 
+def main():
+    stream()
+
+
 class Listener(StreamListener):
 
     def on_data(self, data):
@@ -20,9 +24,9 @@ class Listener(StreamListener):
 
         if 'conviction' in tweet or 'birth' in tweet:
             sentiment = naive_bayes_pickled.sentiment(tweet)
-            print tweet, sentiment
+            print (tweet, sentiment)
             output = open('twitter_feed.txt', 'a')
-            output.write(tweet.encode('utf-8'))
+            output.write(tweet.encode('utf-8') + sentiment)
             output.write('\n')
             output.close()
         return True
@@ -31,7 +35,12 @@ class Listener(StreamListener):
         print status
 
 
-auth = OAuthHandler(ckey, csecret)
-auth.set_access_token(atoken, asecret)
-twitterStream = Stream(auth, Listener())
-twitterStream.filter(track=['conviction', 'birth'], languages=['en'])
+def stream():
+    auth = OAuthHandler(ckey, csecret)
+    auth.set_access_token(atoken, asecret)
+    twitter_stream = Stream(auth, Listener())
+    twitter_stream.filter(track=['conviction', 'birth'], languages=['en'])
+
+
+if __name__ == '__main__':
+    main()
