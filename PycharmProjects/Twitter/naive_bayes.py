@@ -32,7 +32,7 @@ def word_delegation():
     return tweets, word_features
 
 
-def bayes_parameters(tweets, word_features):
+def bayes_parameters(tweets, word_features, count=1900):
 
     # I feel like there has to be a better way to do this to suffice feature_sets definition
     def find_features():
@@ -45,8 +45,8 @@ def bayes_parameters(tweets, word_features):
 
     feature_sets = [(find_features(), category) for (tweet, category) in tweets]
     random.shuffle(feature_sets)
-    training_set = feature_sets[:1900]
-    testing_set = feature_sets[1900:]
+    training_set = feature_sets[:count]
+    testing_set = feature_sets[count:]
 
     return testing_set, training_set
 
