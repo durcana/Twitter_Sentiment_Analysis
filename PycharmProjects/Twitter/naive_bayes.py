@@ -4,11 +4,24 @@ import random
 from nltk.corpus import twitter_samples
 
 
-def main():
-    tweets, word_features = word_delegation()
-    testing_set, training_set = bayes_parameters(tweets, word_features)
-    classifier = bayes(testing_set, training_set)
-    pickling(word_features, classifier)
+# Still figuring out how to do the memoization. Labled 2 functions as memoize 1 and 2 to define where it needs work.
+# I did bring it into one file though and got the script to flow much better.
+# Once the memoize fuctions are fixed, feed.py should run sentiment no problem.
+
+info = {}
+
+
+def memoize1():
+    if w_feats in info:
+        with open('word_delegation.pickle', 'rb') as fp:
+            pickled = pickle.load(fp)
+            tweets = pickled[0]
+            word_features = pickled[1]
+        return tweets, word_features
+    else:
+        tweets, word_features = word_delegation()
+        info['w_feats'] = 'pickled'
+        return tweets, word_features
 
 
 def word_delegation():
@@ -29,45 +42,50 @@ def word_delegation():
     all_words = nltk.FreqDist(all_words)
     word_features = list(all_words.keys())[:3000]
 
+    pickled = [tweets, word_features]
+
+    with open('word_delegation.pickle', 'wb') as fp:
+        pickle.dump(pickled, fp)
+
     return tweets, word_features
 
 
-def bayes_parameters(tweets, word_features, count=1900):
+def find_features(tweet):
+    tweets, word_features = memoize1()
+    words = set(tweet)
+    return {w: w in words for w in word_features}
 
-    # I feel like there has to be a better way to do this to suffice feature_sets definition
-    def find_features():
-        words = set(tweets)
-        features = {}
-        for w in word_features:
-            features[w] = (w in words)
 
-        return features
+def memoize2():
+    if classifier in info:
+        with open('bayes_classifier.pickle', 'rb') as fp:
+            classifier = pickle.load(fp)
+        return classifier
+    else:
+        bayes(tweets, count=1900)
+        info['classifier'] = 'pickled'
 
-    feature_sets = [(find_features(), category) for (tweet, category) in tweets]
+
+def bayes(tweets, count):
+    feature_sets = [(find_features(tweet), category) for (tweet, category) in tweets]
     random.shuffle(feature_sets)
     training_set = feature_sets[:count]
     testing_set = feature_sets[count:]
 
-    return testing_set, training_set
-
-
-def bayes(testing_set, training_set):
     classifier = nltk.NaiveBayesClassifier.train(training_set)
     print ("Naive Bayes Algorithm accuracy percent:", nltk.classify.accuracy(classifier, testing_set)*100)
+
+    # The pos : neg ratio that this comes out in would solve the average sentiment for my keywords.
+    # Need to find how to do this for specific words, instead of the time however many words.
     print (classifier.show_most_informative_features(15))
+
+    with open('bayes_classifier.pickle', 'wb') as fp:
+        pickle.dump(classifier, fp)
 
     return classifier
 
 
-def pickling(word_features, classifier):
-    save_word_features = open('bayes_word_features.pickle', 'wb')
-    pickle.dump(word_features, save_word_features)
-    save_word_features.close()
-
-    save_classifier = open('bayes_classifier.pickle', 'wb')
-    pickle.dump(classifier, save_classifier)
-    save_word_features.close()
-
-
-if __name__ == '__main__':
-    main()
+def sentiment(text):
+    classifier = memoize2()
+    features = find_features(text)
+    return classifier.classify(features)

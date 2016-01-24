@@ -3,17 +3,13 @@ from tweepy import OAuthHandler
 import os
 from tweepy import Stream
 from tweepy.streaming import StreamListener
-import naive_bayes_pickled
+import naive_bayes
 
 
 ckey = os.environ.get('CKEY')
 csecret = os.environ.get('CSECRET')
 atoken = os.environ.get('ATOKEN')
 asecret = os.environ.get('ASECRET')
-
-
-def main():
-    stream()
 
 
 class Listener(StreamListener):
@@ -23,19 +19,17 @@ class Listener(StreamListener):
         tweet = json_data['text']
 
         if 'conviction' in tweet or 'birth' in tweet:
-            sentiment = naive_bayes_pickled.sentiment(tweet)
+            sentiment = naive_bayes.sentiment(tweet)
             print (tweet, sentiment)
-            output = open('twitter_feed.txt', 'a')
-            output.write(tweet.encode('utf-8') + sentiment)
-            output.write('\n')
-            output.close()
+            with open('twitter_feed.txt', 'a') as f:
+                f.write(tweet.encode() + sentiment + '\n')
         return True
 
     def on_error(self, status):
         print status
 
 
-def stream():
+def main():
     auth = OAuthHandler(ckey, csecret)
     auth.set_access_token(atoken, asecret)
     twitter_stream = Stream(auth, Listener())
