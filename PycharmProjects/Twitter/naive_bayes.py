@@ -4,24 +4,22 @@ import random
 from nltk.corpus import twitter_samples
 
 
-# Still figuring out how to do the memoization. Labled 2 functions as memoize 1 and 2 to define where it needs work.
-# I did bring it into one file though and got the script to flow much better.
-# Once the memoize fuctions are fixed, feed.py should run sentiment no problem.
+class Memoize(object):
+    def __init__(self, func):
+        self.func = func
+        self.memo = {}
 
-info = {}
+    def load_memo(self, filename):
+        with open(filename, 'rb') as fp:
+            self.memo.update(pickle.load(fp))
 
+    def __call__(self, *args):
+        if args not in self.memo:
+            self.memo[args] = self.func(*args)
+        return self.memo[args]
 
-def memoize1():
-    if w_feats in info:
-        with open('word_delegation.pickle', 'rb') as fp:
-            pickled = pickle.load(fp)
-            tweets = pickled[0]
-            word_features = pickled[1]
-        return tweets, word_features
-    else:
-        tweets, word_features = word_delegation()
-        info['w_feats'] = 'pickled'
-        return tweets, word_features
+    def return_memo(self):
+        return self.memo
 
 
 def word_delegation():
@@ -42,28 +40,24 @@ def word_delegation():
     all_words = nltk.FreqDist(all_words)
     word_features = list(all_words.keys())[:3000]
 
-    pickled = [tweets, word_features]
+    pickled = {'tweets': tweets,
+               'word_features': word_features}
 
     with open('word_delegation.pickle', 'wb') as fp:
         pickle.dump(pickled, fp)
 
-    return tweets, word_features
+
+def delegation_mem():
+    delegation_memoize = Memoize(word_delegation())
+    delegation_memoize.load_memo('word_delegation.pickle')
+    memo_dict = delegation_memoize.return_memo()
+    return memo_dict['tweets'], memo_dict['word_features']
 
 
 def find_features(tweet):
-    tweets, word_features = memoize1()
+    tweets, word_features = delegation_mem()
     words = set(tweet)
     return {w: w in words for w in word_features}
-
-
-def memoize2():
-    if classifier in info:
-        with open('bayes_classifier.pickle', 'rb') as fp:
-            classifier = pickle.load(fp)
-        return classifier
-    else:
-        bayes(tweets, count=1900)
-        info['classifier'] = 'pickled'
 
 
 def bayes(tweets, count):
@@ -73,19 +67,31 @@ def bayes(tweets, count):
     testing_set = feature_sets[count:]
 
     classifier = nltk.NaiveBayesClassifier.train(training_set)
-    print ("Naive Bayes Algorithm accuracy percent:", nltk.classify.accuracy(classifier, testing_set)*100)
 
+    print("Naive Bayes Algorithm accuracy percent:", nltk.classify.accuracy(classifier, testing_set)*100)
     # The pos : neg ratio that this comes out in would solve the average sentiment for my keywords.
     # Need to find how to do this for specific words, instead of the time however many words.
-    print (classifier.show_most_informative_features(15))
+    print(classifier.show_most_informative_features(15))
+
+    pickled = {'classifier': classifier}
 
     with open('bayes_classifier.pickle', 'wb') as fp:
-        pickle.dump(classifier, fp)
+        pickle.dump(pickled, fp)
 
     return classifier
 
 
+def bayes_mem():
+    tweets, word_features = delegation_mem()
+    bayes_memoize = Memoize(bayes(tweets, count=1900))
+    bayes_memoize.load_memo('bayes_classifier.pickle')
+    memo_dict = bayes_memoize.return_memo()
+    return memo_dict['classifier']
+
+
 def sentiment(text):
-    classifier = memoize2()
+    classifier = bayes_mem()
     features = find_features(text)
     return classifier.classify(features)
+
+print(sentiment('I hope this works!'))
