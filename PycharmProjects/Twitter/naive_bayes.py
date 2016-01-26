@@ -9,14 +9,14 @@ class Memoize(object):
         self.func = func
         self.memo = {}
 
-    def load_memo(self, filename):
-        with open(filename, 'rb') as fp:
-            self.memo.update(pickle.load(fp))
-
     def __call__(self, *args):
         if args not in self.memo:
             self.memo[args] = self.func(*args)
         return self.memo[args]
+
+    def load_memo(self, filename):
+        with open(filename, 'rb') as fp:
+            self.memo.update(pickle.load(fp))
 
     def return_memo(self):
         return self.memo
@@ -70,7 +70,7 @@ def bayes(tweets, count):
 
     print("Naive Bayes Algorithm accuracy percent:", nltk.classify.accuracy(classifier, testing_set)*100)
     # The pos : neg ratio that this comes out in would solve the average sentiment for my keywords.
-    # Need to find how to do this for specific words, instead of the time however many words.
+    # Need to find how to do this for specific words, instead of the top however many words.
     print(classifier.show_most_informative_features(15))
 
     pickled = {'classifier': classifier}
