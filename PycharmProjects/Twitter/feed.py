@@ -20,13 +20,13 @@ class Listener(StreamListener):
 
         if 'conviction' in tweet or 'birth' in tweet:
             sentiment = naive_bayes.sentiment(tweet)
-            print (tweet, sentiment)
+            print(tweet, sentiment)
             with open('twitter_feed.txt', 'a') as f:
                 f.write(tweet.encode() + sentiment + '\n')
         return True
 
     def on_error(self, status):
-        print status
+        print(status)
 
 
 def main():
