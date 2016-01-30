@@ -22,8 +22,7 @@ def word_delegation():
         for word in tweet:
             all_words.append(word.lower())
 
-    all_words = nltk.FreqDist(all_words)
-    word_features = list(all_words.keys())[:3000]
+    word_features = nltk.FreqDist(all_words).keys()[:1000]
 
     return tweets, word_features
 
@@ -46,12 +45,8 @@ def bayes(count):
     feature_sets = [(find_features(tweet), category) for (tweet, category) in tweets]
     random.shuffle(feature_sets)
     training_set = feature_sets[:count]
-    testing_set = feature_sets[count:]
 
     classifier = nltk.NaiveBayesClassifier.train(training_set)
-
-    print("Naive Bayes Algorithm accuracy percent:", nltk.classify.accuracy(classifier, testing_set)*100)
-    classifier.show_most_informative_features(15)
 
     return classifier
 

@@ -19,10 +19,8 @@ class Listener(StreamListener):
         tweet = json_data['text']
 
         if 'conviction' in tweet or 'birth' in tweet:
-            sentiment = naive_bayes.sentiment(tweet)
             print(tweet)
-            with open('twitter_feed.txt', + sentiment + 'a') as f:
-                f.write(tweet.encode() + '\n')
+            print(naive_bayes.sentiment(tweet))
         return True
 
     def on_error(self, status):
