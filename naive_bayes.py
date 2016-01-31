@@ -22,7 +22,7 @@ def word_delegation():
         for word in tweet:
             all_words.append(word.lower())
 
-    word_features = nltk.FreqDist(all_words).keys()[:1000]
+    word_features = list(nltk.FreqDist(all_words).keys())[:1000]
 
     return tweets, word_features
 
